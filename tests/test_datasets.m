@@ -19,16 +19,22 @@ end
 
 function testLoadsChannelDatasets(testCase)
 root = fileparts(fileparts(mfilename('fullpath')));
-strategies = {'tke_adaptive', 'shear_adaptive'};
-for i = 1:numel(strategies)
-    folder = fullfile(root, 'datasets', 'minimal_channel', strategies{i});
-    dns = pqoi.io.loadChannelProfile(fullfile(folder, 'reference_dns.txt'));
-    les = pqoi.io.loadChannelProfile(fullfile(folder, 'les_iteration_07.txt'));
-    verifyEqual(testCase, dns.kind, 'DNS');
+folder = fullfile(root, 'datasets', 'minimal_channel', 'uniform');
+dns = pqoi.io.loadChannelProfile(fullfile(folder, 'reference_dns.txt'));
+verifyEqual(testCase, dns.kind, 'DNS');
+verifyEqual(testCase, dns.format, 'full');
+verifyEqual(testCase, numel(dns.coordinate), 81);
+verifyTrue(testCase, isfield(dns.profiles, 'turbulentKineticEnergy'));
+
+resolutions = [9 11 13 17 25 33 49 65];
+for n = resolutions
+    filename = sprintf('les_ny%03d.txt', n);
+    les = pqoi.io.loadChannelProfile(fullfile(folder, filename));
     verifyEqual(testCase, les.kind, 'LES');
-    verifyEqual(testCase, numel(dns.coordinate), 81);
-    verifyEqual(testCase, numel(les.coordinate), 33);
-    verifyTrue(testCase, isfield(les.profiles, 'turbulentKineticEnergy'));
+    verifyEqual(testCase, les.format, 'reduced');
+    verifyEqual(testCase, numel(les.coordinate), n);
     verifyTrue(testCase, isfield(les.profiles, 'totalShearStress'));
+    verifyTrue(testCase, isfield(les.profiles, 'production'));
+    verifyFalse(testCase, isfield(les.profiles, 'turbulentKineticEnergy'));
 end
 end

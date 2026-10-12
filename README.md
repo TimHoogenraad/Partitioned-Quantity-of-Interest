@@ -130,28 +130,30 @@ les = ks.approximations(1);
 ### Minimal channel flow
 
 ```text
-datasets/minimal_channel/tke_adaptive/
-datasets/minimal_channel/shear_adaptive/
+datasets/minimal_channel/uniform/
 ```
 
-Each directory contains an 81-point DNS profile and seven LES profiles from
-successive wall-normal-grid adaptations. The `tke_adaptive` sequence targets
-turbulent kinetic energy, while `shear_adaptive` targets total shear stress.
-Every text file retains its simulation metadata and time-averaged velocity,
-second-moment, shear, derivative, SGS, and dissipation columns.
+The directory contains an 81-point DNS profile and uniform LES profiles with
+9, 11, 13, 17, 25, 33, 49, and 65 wall-normal points. Every text file retains
+its simulation metadata. The DNS includes velocity means, second moments,
+shear, derivatives, and dissipation. The reduced LES profiles contain the
+mean streamwise and wall-normal velocities, Reynolds shear, SGS shear, and
+mean velocity gradient.
 
 Load a profile with:
 
 ```matlab
 dns = pqoi.io.loadChannelProfile( ...
-    'datasets/minimal_channel/tke_adaptive/reference_dns.txt');
+    'datasets/minimal_channel/uniform/reference_dns.txt');
 les = pqoi.io.loadChannelProfile( ...
-    'datasets/minimal_channel/tke_adaptive/les_iteration_07.txt');
+    'datasets/minimal_channel/uniform/les_ny033.txt');
 ```
 
 Both loaders return the same high-level fields used by `pqoi.compare`:
 `coordinate` and `profiles`. They also preserve the standardized primitive
-statistics under `data` for defining additional QoIs.
+statistics under `data` for defining additional QoIs. Reduced uniform LES
+files support total shear stress and production; they do not contain the
+second moments required to reconstruct turbulent kinetic energy.
 
 ## Comparing reference and approximate data
 

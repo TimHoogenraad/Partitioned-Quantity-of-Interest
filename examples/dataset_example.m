@@ -11,10 +11,14 @@ partitions = pqoi.makeGridPartitions(les.coordinate, 16);
 comparison = pqoi.compare(ks.reference, les, partitions);
 disp(comparison.profiles.totalEnergy.globalError);
 
-%% Minimal channel: compare one adaptive LES iteration against DNS
-folder = fullfile(root, 'datasets', 'minimal_channel', 'tke_adaptive');
+%% Minimal channel: compare one uniform LES resolution against DNS
+folder = fullfile(root, 'datasets', 'minimal_channel', 'uniform');
 dns = pqoi.io.loadChannelProfile(fullfile(folder, 'reference_dns.txt'));
-les = pqoi.io.loadChannelProfile(fullfile(folder, 'les_iteration_07.txt'));
+les = pqoi.io.loadChannelProfile(fullfile(folder, 'les_ny033.txt'));
 partitions = pqoi.makeGridPartitions(les.coordinate, 4);
-comparison = pqoi.compare(dns, les, partitions);
-disp(comparison.profiles.turbulentKineticEnergy.globalError);
+reference.coordinate = dns.coordinate;
+reference.profiles.totalShearStress = dns.profiles.totalShearStress;
+approximation.coordinate = les.coordinate;
+approximation.profiles.totalShearStress = les.profiles.totalShearStress;
+comparison = pqoi.compare(reference, approximation, partitions);
+disp(comparison.profiles.totalShearStress.globalError);
