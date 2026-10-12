@@ -67,6 +67,13 @@ To run an end-to-end calculation with the bundled datasets:
 run('examples/dataset_example.m')
 ```
 
+To reproduce the uniform-channel partition-error trends for total shear
+stress and turbulent kinetic energy:
+
+```matlab
+run('examples/channel_uniform_trends.m')
+```
+
 ## Partition definitions
 
 ### Grid-aligned partitions
