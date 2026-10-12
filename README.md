@@ -134,11 +134,10 @@ datasets/minimal_channel/uniform/
 ```
 
 The directory contains an 81-point DNS profile and uniform LES profiles with
-9, 11, 13, 17, 25, 33, 49, and 65 wall-normal points. Every text file retains
-its simulation metadata. The DNS includes velocity means, second moments,
-shear, derivatives, and dissipation. The reduced LES profiles contain the
-mean streamwise and wall-normal velocities, Reynolds shear, SGS shear, and
-mean velocity gradient.
+9, 17, 33, 65, and 129 wall-normal points. Every text file retains its
+simulation metadata and full time-averaged statistics: velocity means,
+velocity second moments, Reynolds shear, SGS shear for LES, mean velocity
+gradient, SGS viscosity, and dissipation diagnostics.
 
 Load a profile with:
 
@@ -151,9 +150,8 @@ les = pqoi.io.loadChannelProfile( ...
 
 Both loaders return the same high-level fields used by `pqoi.compare`:
 `coordinate` and `profiles`. They also preserve the standardized primitive
-statistics under `data` for defining additional QoIs. Reduced uniform LES
-files support total shear stress and production; they do not contain the
-second moments required to reconstruct turbulent kinetic energy.
+statistics under `data` for defining additional QoIs. Every included LES
+case supports total shear stress, turbulent kinetic energy, and production.
 
 ## Comparing reference and approximate data
 

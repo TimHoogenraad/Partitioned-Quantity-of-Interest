@@ -26,15 +26,15 @@ verifyEqual(testCase, dns.format, 'full');
 verifyEqual(testCase, numel(dns.coordinate), 81);
 verifyTrue(testCase, isfield(dns.profiles, 'turbulentKineticEnergy'));
 
-resolutions = [9 11 13 17 25 33 49 65];
+resolutions = [9 17 33 65 129];
 for n = resolutions
     filename = sprintf('les_ny%03d.txt', n);
     les = pqoi.io.loadChannelProfile(fullfile(folder, filename));
     verifyEqual(testCase, les.kind, 'LES');
-    verifyEqual(testCase, les.format, 'reduced');
+    verifyEqual(testCase, les.format, 'full');
     verifyEqual(testCase, numel(les.coordinate), n);
     verifyTrue(testCase, isfield(les.profiles, 'totalShearStress'));
     verifyTrue(testCase, isfield(les.profiles, 'production'));
-    verifyFalse(testCase, isfield(les.profiles, 'turbulentKineticEnergy'));
+    verifyTrue(testCase, isfield(les.profiles, 'turbulentKineticEnergy'));
 end
 end
