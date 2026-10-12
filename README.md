@@ -2,8 +2,8 @@
 
 A MATLAB library for computing partitioned quantities of interest (pQoIs)
 and local field statistics from simulation profiles. The numerical core is
-independent of the governing equations and can be used with both the
-Kuramoto-Sivashinsky equation and minimal channel flow data.
+independent of the governing equations. Modules and example datasets are
+included for the Kuramoto-Sivashinsky equation and minimal channel flow.
 
 The current implementation partitions one physical coordinate. Profile
 arrays may have additional dimensions, so multiple time samples,
@@ -61,6 +61,12 @@ Run the complete test suite with:
 run_tests
 ```
 
+To run an end-to-end calculation with the bundled datasets:
+
+```matlab
+run('examples/dataset_example.m')
+```
+
 ## Partition definitions
 
 ### Grid-aligned partitions
@@ -92,29 +98,60 @@ Q = pqoi.integrate(x, q, partitions, 'Interpolation', 'pchip');
 ```
 
 When an edge is absent from the grid, the profile is interpolated exactly
-at that edge before trapezoidal integration. This is the fallback used by
-the existing channel-flow postprocessing. Both `linear` and `pchip`
+at that edge before trapezoidal integration. Both `linear` and `pchip`
 interpolation are supported.
 
-## Relation to the original research code
+## Included datasets
 
-The two original applications used related, but slightly different,
-partition conventions:
+Compact time-averaged profile datasets are stored under `datasets/`. They
+contain no raw snapshots or restart fields.
 
-- The KS `partitionQoIError` code generated shared index boundaries with
-  `round(linspace(...))`. DNS bounds were selected using their nearest
-  physical grid points.
-- The early channel-flow `computePartitionData` code used a fixed number of
-  points per partition and advanced the next partition from the previous
-  final index, thereby sharing the edge.
-- Later channel-flow scripts prescribed fixed physical edges and inserted
-  interpolated profile values whenever an edge did not coincide with a
-  grid point.
+### Kuramoto-Sivashinsky
 
-This library makes the convention unambiguous: `a` is the number of grid
-intervals, adjacent partitions share an edge, and physical edges use
-interpolation only when required. Regression tests reproduce the working
-KS grid-aligned formula and the channel-flow physical-edge fallback.
+```text
+datasets/ks/dirichlet_profiles.mat
+datasets/ks/periodic_profiles.mat
+```
+
+Each file contains a 2049-point DNS profile and LES profiles with 129, 257,
+and 513 points. Available statistics include the mean field, mean-square
+field, mean energy, fluctuating energy, and total energy.
+
+Load either boundary-condition case with:
+
+```matlab
+ks = pqoi.io.loadKSProfiles( ...
+    'datasets/ks/dirichlet_profiles.mat');
+
+dns = ks.reference;
+les = ks.approximations(1);
+```
+
+### Minimal channel flow
+
+```text
+datasets/minimal_channel/tke_adaptive/
+datasets/minimal_channel/shear_adaptive/
+```
+
+Each directory contains an 81-point DNS profile and seven LES profiles from
+successive wall-normal-grid adaptations. The `tke_adaptive` sequence targets
+turbulent kinetic energy, while `shear_adaptive` targets total shear stress.
+Every text file retains its simulation metadata and time-averaged velocity,
+second-moment, shear, derivative, SGS, and dissipation columns.
+
+Load a profile with:
+
+```matlab
+dns = pqoi.io.loadChannelProfile( ...
+    'datasets/minimal_channel/tke_adaptive/reference_dns.txt');
+les = pqoi.io.loadChannelProfile( ...
+    'datasets/minimal_channel/tke_adaptive/les_iteration_07.txt');
+```
+
+Both loaders return the same high-level fields used by `pqoi.compare`:
+`coordinate` and `profiles`. They also preserve the standardized primitive
+statistics under `data` for defining additional QoIs.
 
 ## Comparing reference and approximate data
 
@@ -131,8 +168,7 @@ partitions = pqoi.makeGridPartitions(xLES, 8);
 comparison = pqoi.compare(reference, approximation, partitions);
 ```
 
-By default, partition errors follow the convention used in the research
-scripts:
+By default, partition errors are normalized by the reference-domain total:
 
 ```text
 100 * abs(Q_approx,p - Q_ref,p) / abs(Q_ref,total).
@@ -155,8 +191,8 @@ stats = pqoi.partitionStatistics(x, fields, partitions);
 ```
 
 The default `spatial` weighting integrates over physical distance and is
-appropriate for nonuniform grids. To reproduce the unweighted `mean` and
-`std` calls in the original channel-flow helper, use:
+appropriate for nonuniform grids. For unweighted statistics over the stored
+samples, use:
 
 ```matlab
 stats = pqoi.partitionStatistics(x, fields, partitions, ...
@@ -233,7 +269,8 @@ region partition objects without changing the QoI modules.
   +qoi/+channel/             Minimal-channel QoI definitions
   private/                   Internal array and interpolation helpers
 examples/                    Runnable KS and channel examples
-tests/                       Unit and legacy-regression tests
+datasets/                    Compact time-averaged profile datasets
+tests/                       Unit and numerical-compatibility tests
 run_tests.m                  Test-suite entry point
 ```
 
@@ -245,8 +282,8 @@ When extending the library:
 2. Keep partition geometry and numerical integration in the core.
 3. Define boundaries in physical coordinates, even when initially selected
    by grid index.
-4. Add a focused unit test and, when replacing established analysis code, a
-   regression test against that implementation.
+4. Add a focused unit test and a regression test for any changed numerical
+   convention.
 5. Do not commit large DNS or LES datasets. Use compact synthetic fixtures
    or documented external datasets.
 

@@ -7,3 +7,4 @@
 slprj/
 codegen/
 test-results/
+!datasets/**/*.mat

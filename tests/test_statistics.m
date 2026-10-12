@@ -35,7 +35,7 @@ verifySize(testCase, values, [2 3]);
 verifyEqual(testCase, sum(values,1), [0.5 1 1.5], 'AbsTol', 1e-13);
 end
 
-function testLegacySampleStatisticsOption(testCase)
+function testSampleWeightingOption(testCase)
 x = [0; 0.1; 0.4; 1.0];
 p = pqoi.makeGridPartitions(x, 3);
 stats = pqoi.partitionStatistics(x, x, p, 'Weighting', 'sample');
