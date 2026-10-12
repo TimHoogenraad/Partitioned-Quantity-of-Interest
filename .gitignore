@@ -1,0 +1,9 @@
+*.asv
+*.m~
+*.mat
+*.fig
+*.png
+*.pdf
+slprj/
+codegen/
+test-results/
